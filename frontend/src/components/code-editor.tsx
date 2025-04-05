@@ -12,6 +12,8 @@ import { EditorView } from '@codemirror/view';
 import { Bot } from 'lucide-react';
 import { evaluateUserCode } from "@/services/evaluateCode"
 import { fetchAiAnaysis } from "@/services/fetchAiAnalysis"
+import { TestCaseResults } from "./test-case-results"
+import { sampleTestResults, TestResult } from "@/services/sampleTestResults"
 
 interface Problem {
   id: number
@@ -39,6 +41,7 @@ interface CodeEditorProps {
 export default function CodeEditor({ problem, problems, onSelectProblem, selectedProblemId, code, setCode }: CodeEditorProps) {
   const [output, setOutput] = useState("")
   const [activeTab, setActiveTab] = useState("code")
+  const [testResults, setTestResults] = useState<TestResult[]>([])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const highlightRef = useRef<HTMLPreElement>(null)
 
@@ -77,16 +80,13 @@ export default function CodeEditor({ problem, problems, onSelectProblem, selecte
 
   const handleRunCode = async () => {
     try {
-      const response = await evaluateUserCode(problem.id, code)
-      setOutput(response.output)
+      // Using sample test results for UI testing
+      setTestResults(sampleTestResults)
       setActiveTab("testcases")
     } catch (err) {
       setOutput("An error occurred during code evaluation." + err)
       setActiveTab("testcases")
     }
-
-    // setOutput("Running test cases...\n\nTest case 1: Passed\nTest case 2: Passed\n\nAll test cases passed!")
-    setActiveTab("testcases")
   }
 
   const handleAIAnalysis = async () => {
@@ -170,14 +170,18 @@ export default function CodeEditor({ problem, problems, onSelectProblem, selecte
             {output && (
               <div className="mb-4 p-3 bg-muted rounded-md font-mono text-xs whitespace-pre-wrap">{output}</div>
             )}
-            <div className="rounded-md border p-4">
-              <h3 className="font-medium text-sm mb-2">Example Test Cases</h3>
-              {problem.examples.map((example, index) => (
-                <div key={index} className="text-xs font-mono mb-2">
-                  <span className="font-semibold">Test {index + 1}:</span> {example.input}
-                </div>
-              ))}
-            </div>
+            {testResults.length > 0 ? (
+              <TestCaseResults testCases={testResults} />
+            ) : (
+              <div className="rounded-md border p-4">
+                <h3 className="font-medium text-sm mb-2">Example Test Cases</h3>
+                {problem.examples.map((example, index) => (
+                  <div key={index} className="text-xs font-mono mb-2">
+                    <span className="font-semibold">Test {index + 1}:</span> {example.input}
+                  </div>
+                ))}
+              </div>
+            )}
             <div className="rounded-md border p-4">
               <h3 className="font-medium text-sm mb-2">Add Custom Test Case</h3>
               <textarea
