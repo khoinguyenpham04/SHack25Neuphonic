@@ -2,7 +2,7 @@ import argparse
 import json
 from aiohttp import web
 
-from codedriver.services.evaluate_service import evaluate_problem
+from services.evaluate_service import evaluate_problem
 
 
 async def handle_get(request):

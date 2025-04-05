@@ -2,7 +2,7 @@ import os
 import json
 from typing import Any, Dict, List
 
-from codedriver.services.driver import run_test_cases
+from services.driver import run_test_cases
 
 # Assumes your test cases JSON files are stored in a folder called 'test_cases'
 TEST_CASES_DIR = "../test_cases/"
