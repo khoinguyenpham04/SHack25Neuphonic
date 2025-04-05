@@ -11,6 +11,7 @@ import { foldGutter } from '@codemirror/language';
 import { EditorView } from '@codemirror/view';
 import { Bot } from 'lucide-react';
 import { evaluateUserCode } from "@/services/evaluateCode"
+import { fetchAiAnaysis } from "@/services/fetchAiAnalysis"
 
 interface Problem {
   id: number
@@ -40,7 +41,7 @@ export default function CodeEditor({ problem, problems, onSelectProblem, selecte
   const [activeTab, setActiveTab] = useState("code")
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const highlightRef = useRef<HTMLPreElement>(null)
-  
+
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
       case "easy":
@@ -90,33 +91,17 @@ export default function CodeEditor({ problem, problems, onSelectProblem, selecte
 
   const handleAIAnalysis = async () => {
     try {
-      const response = await fetch('/api/analyse', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          code,
-          language: 'python',
-          problemDescription: problem.description,
-          examples: problem.examples,
-          constraints: problem.constraints
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to get AI analysis');
-      }
-
-      const data = await response.json();
+      const response = await fetchAiAnaysis(code, problem.description)
       const analysisEvent = new CustomEvent('aiAnalysis', {
-        detail: { feedback: data.feedback }
+        detail: { feedback: response.feedback }
       });
       window.dispatchEvent(analysisEvent);
-    } catch (error) {
-      console.error('Error getting AI analysis:', error);
+
+    } catch (err) {
       setOutput('Failed to analyze code. Please try again.');
+
     }
+
   }
 
   return (
@@ -155,8 +140,8 @@ export default function CodeEditor({ problem, problems, onSelectProblem, selecte
                   Get AI Feedback
                 </Button>
                 <div className="flex gap-2">
-                <Button className="bg-green-500 hover:bg-green-600 text-white">Submit</Button>
-              </div>
+                  <Button className="bg-green-500 hover:bg-green-600 text-white">Submit</Button>
+                </div>
               </div>
             </div>
           </div>
