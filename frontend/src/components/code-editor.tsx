@@ -4,28 +4,52 @@ import { useState, useRef, useEffect } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import MonacoEditor from "./monaco-editor"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import  Editor from '@uiw/react-codemirror';
+import { python } from '@codemirror/lang-python';
+import { foldGutter } from '@codemirror/language';
+import { EditorView } from '@codemirror/view';
 
 interface Problem {
   id: number
   title: string
+  difficulty: string
+  description: string
   examples: {
     input: string
     output: string
     explanation?: string
   }[]
+  constraints: string[]
   starterCode: string
 }
 
 interface CodeEditorProps {
   problem: Problem
+  problems: Problem[]
+  onSelectProblem: (problem: Problem) => void
+  selectedProblemId: number
 }
 
-export default function CodeEditor({ problem }: CodeEditorProps) {
+export default function CodeEditor({ problem, problems, onSelectProblem, selectedProblemId }: CodeEditorProps) {
   const [code, setCode] = useState(problem.starterCode)
   const [output, setOutput] = useState("")
+  const [activeTab, setActiveTab] = useState("code")
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const highlightRef = useRef<HTMLPreElement>(null)
+  
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty.toLowerCase()) {
+      case "easy":
+        return "text-green-500"
+      case "medium":
+        return "text-yellow-500"
+      case "hard":
+        return "text-red-500"
+      default:
+        return "text-gray-500"
+    }
+  }
 
   // Update code when problem changes
   useEffect(() => {
@@ -52,52 +76,64 @@ export default function CodeEditor({ problem }: CodeEditorProps) {
 
   const handleRunCode = () => {
     setOutput("Running test cases...\n\nTest case 1: Passed\nTest case 2: Passed\n\nAll test cases passed!")
+    setActiveTab("testcases")
   }
 
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="pb-0">
-        <Tabs defaultValue="code" className="w-full">
-          <TabsList>
-            <TabsTrigger value="code">Code</TabsTrigger>
-            <TabsTrigger value="testcases">Test Cases</TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <div className="flex items-center justify-between">
+            <TabsList>
+              <TabsTrigger value="code">Code</TabsTrigger>
+              <TabsTrigger value="testcases">Test Cases</TabsTrigger>
+            </TabsList>
+            <div className="flex items-center gap-4">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">Problem: {problems.find((p) => p.id === selectedProblemId)?.title}</Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  {problems.map((problem) => (
+                    <DropdownMenuItem
+                      key={problem.id}
+                      onClick={() => onSelectProblem(problems.find((p) => p.id === problem.id)!)}
+                      className="flex justify-between"
+                    >
+                      <span>{problem.title}</span>
+                      <span className={getDifficultyColor(problem.difficulty)}>{problem.difficulty}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button className="bg-green-500 hover:bg-green-600 text-white">Submit</Button>
+            </div>
+          </div>
         </Tabs>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col pt-4">
-        <Tabs defaultValue="code" className="flex-1 flex flex-col">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
           <TabsContent value="code" className="flex-1 flex flex-col">
             <div className="flex-1 mb-4 relative h-[300px]">
-              <MonacoEditor
+              <Editor
                 value={code}
                 onChange={setCode}
-                language="javascript"
-                theme="leetcode-dark"
-                options={{
-                  minimap: { enabled: false },
-                  scrollBeyondLastLine: false,
-                  lineNumbers: "on",
-                  glyphMargin: false,
-                  folding: true,
-                  lineDecorationsWidth: 10,
-                  lineNumbersMinChars: 3,
-                  automaticLayout: true,
-                  tabSize: 2,
-                  wordWrap: "on",
-                }}
+                extensions={[python(), foldGutter(), EditorView.lineWrapping]}
+                theme="dark"
+                height="500%"
               />
             </div>
             <div className="flex justify-between">
               <Button variant="outline" onClick={() => setCode(problem.starterCode)}>
                 Reset
               </Button>
-              <Button onClick={handleRunCode}>Run Code</Button>
+              <Button className="bg-green-500 hover:bg-green-600 text-white" onClick={handleRunCode}>Run Code</Button>
             </div>
-            {output && (
-              <div className="mt-4 p-3 bg-muted rounded-md font-mono text-xs whitespace-pre-wrap">{output}</div>
-            )}
           </TabsContent>
           <TabsContent value="testcases" className="space-y-4">
+            {output && (
+              <div className="mb-4 p-3 bg-muted rounded-md font-mono text-xs whitespace-pre-wrap">{output}</div>
+            )}
             <div className="rounded-md border p-4">
               <h3 className="font-medium text-sm mb-2">Example Test Cases</h3>
               {problem.examples.map((example, index) => (
@@ -112,7 +148,7 @@ export default function CodeEditor({ problem }: CodeEditorProps) {
                 className="w-full h-20 p-2 rounded-md border text-xs font-mono"
                 placeholder="Enter your custom test case here..."
               />
-              <Button size="sm" className="mt-2">
+              <Button size="sm" className="mt-2 bg-green-500 hover:bg-green-600 text-white">
                 Run
               </Button>
             </div>
@@ -122,4 +158,3 @@ export default function CodeEditor({ problem }: CodeEditorProps) {
     </Card>
   )
 }
-

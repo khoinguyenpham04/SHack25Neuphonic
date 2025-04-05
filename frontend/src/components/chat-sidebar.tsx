@@ -143,7 +143,9 @@ export default function ChatSidebar() {
             onClick={toggleRecording}
             size="icon"
             variant={isRecording ? "destructive" : "default"}
-            className="w-12 h-12 rounded-full"
+            className={`w-12 h-12 rounded-full ${
+              isRecording ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'
+            } text-white`}
           >
             {isRecording ? <MicOff size={24} /> : <Mic size={24} />}
             <span className="sr-only">{isRecording ? "Stop recording" : "Start recording"}</span>

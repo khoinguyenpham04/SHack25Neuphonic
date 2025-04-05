@@ -32,9 +32,9 @@ const SAMPLE_PROBLEMS = [
       "-10^9 <= target <= 10^9",
       "Only one valid answer exists.",
     ],
-    starterCode: `function twoSum(nums, target) {
-    // Your code here
-};`,
+    starterCode: `def two_sum(nums, target):
+    # Your code here
+    pass`,
   },
   {
     id: 2,
@@ -44,19 +44,19 @@ const SAMPLE_PROBLEMS = [
     examples: [
       {
         input: "x = 121",
-        output: "true",
+        output: "True",
         explanation: "121 reads as 121 from left to right and from right to left.",
       },
       {
         input: "x = -121",
-        output: "false",
+        output: "False",
         explanation: "From left to right, it reads -121. From right to left, it becomes 121-.",
       },
     ],
     constraints: ["-2^31 <= x <= 2^31 - 1"],
-    starterCode: `function isPalindrome(x) {
-    // Your code here
-};`,
+    starterCode: `def is_palindrome(x):
+    # Your code here
+    pass`,
   },
 ]
 
@@ -66,11 +66,6 @@ export default function Dashboard() {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex flex-col bg-background">
-        <Header
-          problems={SAMPLE_PROBLEMS}
-          onSelectProblem={setSelectedProblem}
-          selectedProblemId={selectedProblem.id}
-        />
         <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
           {/* First column: Problem display */}
           <div className="w-full md:w-1/3 lg:w-1/4 xl:w-1/4 overflow-auto p-4 border-b md:border-b-0 md:border-r">
@@ -79,7 +74,12 @@ export default function Dashboard() {
 
           {/* Second column: Code editor */}
           <div className="w-full md:w-1/3 lg:w-2/4 xl:w-2/4 overflow-auto p-4 border-b md:border-b-0 md:border-r">
-            <CodeEditor problem={selectedProblem} />
+            <CodeEditor 
+              problem={selectedProblem} 
+              problems={SAMPLE_PROBLEMS}
+              onSelectProblem={(problem) => setSelectedProblem(problem as typeof selectedProblem)}
+              selectedProblemId={selectedProblem.id}
+            />
           </div>
 
           {/* Third column: Chat sidebar */}
