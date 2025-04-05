@@ -1,18 +1,19 @@
 import argparse
 import json
 from aiohttp import web
-from typing import Any
+import aiohttp_cors  
 
 from services.evaluate_service import evaluate_problem
 
 
-async def handle_get(_):
+async def handle_get(request):
     return web.Response(text="GET not allowed", status=403, content_type="text/plain")
 
 
 async def handle_post(request):
     # Ensure posts are made to the evaluation endpoint
     if request.path != "/eval":
+        print("fail")
         return web.json_response(
             {
                 "status": 400,
@@ -23,20 +24,18 @@ async def handle_post(request):
 
     # Check content type
     if request.content_type != "application/json":
+        print("fail2")
         return web.json_response(
-            {
-                "status": 400, 
-                "body": "Unsupported content type, please use `application/json`"
-            },
-            status=400,
+            {"status": 400, "body": "Unsupported content type, please use `application/json`"}, status=400
         )
 
-    resp = await request
     try:
         # Process JSON data
-        data = resp.json()
+        data = await request.json()
         problem_name = data.get("problem_name")
         code = data.get("user_code")
+
+        # print(f'Problem: {problem_name}, code: {code}')
 
         if not problem_name or not code:
             return web.json_response(
@@ -44,17 +43,21 @@ async def handle_post(request):
                 status=400,
             )
         
-        evaluation_result : dict[str, Any]= evaluate_problem(problem_name, code)
+        evaluation_result = evaluate_problem(problem_name, code)
+        print(evaluation_result)
+
+
 
         return web.json_response(
-            {"status": 200, "body": f"{evaluation_result}"}
+            {"status": 200, "body": f"Received problem: {problem_name}, code length: {len(code)}"}
         )
 
     except json.JSONDecodeError:
         return web.json_response(
-            {"status": 400, "body": "Invalid JSON data:\n" + resp.text()}, status=400
+            {"status": 400, "body": "Invalid JSON data:\n" + data.text() }, status=400
         )
     except Exception as e:
+        print(e)
         return web.json_response(
             {"status": 500, "body": f"Error processing request: {str(e)}"}, status=500
         )
@@ -65,6 +68,19 @@ def run_server(port):
     # Configure routes
     app.router.add_get("/{path:.*}", handle_get)
     app.router.add_post("/{path:.*}", handle_post)
+
+    # Setup CORS
+    cors = aiohttp_cors.setup(app, defaults={
+        "*": aiohttp_cors.ResourceOptions(
+            allow_credentials=True,
+            expose_headers="*",
+            allow_headers="*",
+        )
+    })
+
+    # Apply CORS to all routes
+    for route in list(app.router.routes()):
+        cors.add(route)
 
     web.run_app(app, host="", port=port)
 

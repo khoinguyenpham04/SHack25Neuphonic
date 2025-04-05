@@ -141,7 +141,7 @@ def run_user_code(user_code: str, input_data: Any) -> Any:
         future_call = executor.submit(_call_solution)
 
         try:
-            return future_call.result(timeout=15)
+            return [future_call.result(timeout=15)]
         except concurrent.futures.TimeoutError:
             raise RuntimeError("Call to 'solution' timed out.")
         except Exception as e:

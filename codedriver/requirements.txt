@@ -2,3 +2,4 @@ requests
 aiohttp
 typing
 argparse
+aiohttp_cors

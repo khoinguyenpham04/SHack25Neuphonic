@@ -9,6 +9,7 @@ import  Editor from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
 import { foldGutter } from '@codemirror/language';
 import { EditorView } from '@codemirror/view';
+import { evaluateUserCode } from "@/services/evaluateCode"
 
 interface Problem {
   id: number
@@ -74,8 +75,17 @@ export default function CodeEditor({ problem, problems, onSelectProblem, selecte
     return () => textarea.removeEventListener("scroll", handleScroll)
   }, [])
 
-  const handleRunCode = () => {
-    setOutput("Running test cases...\n\nTest case 1: Passed\nTest case 2: Passed\n\nAll test cases passed!")
+  const handleRunCode = async () => {
+    try {
+      const response = await evaluateUserCode(problem.id, code)
+      setOutput(response.output)
+      setActiveTab("testcases")
+    } catch (err) {
+      setOutput("An error occurred during code evaluation." + err)
+      setActiveTab("testcases")
+    }
+
+    // setOutput("Running test cases...\n\nTest case 1: Passed\nTest case 2: Passed\n\nAll test cases passed!")
     setActiveTab("testcases")
   }
 
