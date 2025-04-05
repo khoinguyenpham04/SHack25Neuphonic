@@ -1,5 +1,9 @@
 import os
 import asyncio
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv('/Users/khoinguyen_pham/GitHub/studenthack25/.env')
 
 # See AgentConfig model for full list of parameters to configure the agent
 from pyneuphonic import Neuphonic, Agent, AgentConfig  # noqa: F401
