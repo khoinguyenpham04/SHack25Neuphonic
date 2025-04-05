@@ -4,29 +4,49 @@ import { useState, useRef, useEffect } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import MonacoEditor from "./monaco-editor"
 
 interface Problem {
   id: number
   title: string
+  difficulty: string
+  description: string
   examples: {
     input: string
     output: string
     explanation?: string
   }[]
+  constraints: string[]
   starterCode: string
 }
 
 interface CodeEditorProps {
   problem: Problem
+  problems: Problem[]
+  onSelectProblem: (problem: Problem) => void
+  selectedProblemId: number
 }
 
-export default function CodeEditor({ problem }: CodeEditorProps) {
+export default function CodeEditor({ problem, problems, onSelectProblem, selectedProblemId }: CodeEditorProps) {
   const [code, setCode] = useState(problem.starterCode)
   const [output, setOutput] = useState("")
   const [activeTab, setActiveTab] = useState("code")
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const highlightRef = useRef<HTMLPreElement>(null)
+  
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty.toLowerCase()) {
+      case "easy":
+        return "text-green-500"
+      case "medium":
+        return "text-yellow-500"
+      case "hard":
+        return "text-red-500"
+      default:
+        return "text-gray-500"
+    }
+  }
 
   // Update code when problem changes
   useEffect(() => {
@@ -60,10 +80,32 @@ export default function CodeEditor({ problem }: CodeEditorProps) {
     <Card className="h-full flex flex-col">
       <CardHeader className="pb-0">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList>
-            <TabsTrigger value="code">Code</TabsTrigger>
-            <TabsTrigger value="testcases">Test Cases</TabsTrigger>
-          </TabsList>
+          <div className="flex items-center justify-between">
+            <TabsList>
+              <TabsTrigger value="code">Code</TabsTrigger>
+              <TabsTrigger value="testcases">Test Cases</TabsTrigger>
+            </TabsList>
+            <div className="flex items-center gap-4">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">Problem: {problems.find((p) => p.id === selectedProblemId)?.title}</Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  {problems.map((problem) => (
+                    <DropdownMenuItem
+                      key={problem.id}
+                      onClick={() => onSelectProblem(problems.find((p) => p.id === problem.id)!)}
+                      className="flex justify-between"
+                    >
+                      <span>{problem.title}</span>
+                      <span className={getDifficultyColor(problem.difficulty)}>{problem.difficulty}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button className="bg-green-500 hover:bg-green-600 text-white">Submit</Button>
+            </div>
+          </div>
         </Tabs>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col pt-4">

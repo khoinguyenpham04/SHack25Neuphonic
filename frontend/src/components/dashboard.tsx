@@ -66,7 +66,6 @@ export default function Dashboard() {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex flex-col bg-background">
-        
         <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
           {/* First column: Problem display */}
           <div className="w-full md:w-1/3 lg:w-1/4 xl:w-1/4 overflow-auto p-4 border-b md:border-b-0 md:border-r">
@@ -75,7 +74,12 @@ export default function Dashboard() {
 
           {/* Second column: Code editor */}
           <div className="w-full md:w-1/3 lg:w-2/4 xl:w-2/4 overflow-auto p-4 border-b md:border-b-0 md:border-r">
-            <CodeEditor problem={selectedProblem} />
+            <CodeEditor 
+              problem={selectedProblem} 
+              problems={SAMPLE_PROBLEMS}
+              onSelectProblem={(problem) => setSelectedProblem(problem as typeof selectedProblem)}
+              selectedProblemId={selectedProblem.id}
+            />
           </div>
 
           {/* Third column: Chat sidebar */}
