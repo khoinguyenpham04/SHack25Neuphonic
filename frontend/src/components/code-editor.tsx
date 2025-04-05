@@ -5,7 +5,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import MonacoEditor from "./monaco-editor"
+import  Editor from '@uiw/react-codemirror';
+import { python } from '@codemirror/lang-python';
+import { foldGutter } from '@codemirror/language';
+import { EditorView } from '@codemirror/view';
 
 interface Problem {
   id: number
@@ -112,23 +115,12 @@ export default function CodeEditor({ problem, problems, onSelectProblem, selecte
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
           <TabsContent value="code" className="flex-1 flex flex-col">
             <div className="flex-1 mb-4 relative h-[300px]">
-              <MonacoEditor
+              <Editor
                 value={code}
                 onChange={setCode}
-                language="javascript"
-                theme="leetcode-dark"
-                options={{
-                  minimap: { enabled: false },
-                  scrollBeyondLastLine: false,
-                  lineNumbers: "on",
-                  glyphMargin: false,
-                  folding: true,
-                  lineDecorationsWidth: 10,
-                  lineNumbersMinChars: 3,
-                  automaticLayout: true,
-                  tabSize: 2,
-                  wordWrap: "on",
-                }}
+                extensions={[python(), foldGutter(), EditorView.lineWrapping]}
+                theme="dark"
+                height="500%"
               />
             </div>
             <div className="flex justify-between">
@@ -166,4 +158,3 @@ export default function CodeEditor({ problem, problems, onSelectProblem, selecte
     </Card>
   )
 }
-

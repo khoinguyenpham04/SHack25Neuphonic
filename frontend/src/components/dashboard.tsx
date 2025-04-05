@@ -32,9 +32,9 @@ const SAMPLE_PROBLEMS = [
       "-10^9 <= target <= 10^9",
       "Only one valid answer exists.",
     ],
-    starterCode: `function solution(nums, target) {
-    // Your code here
-};`,
+    starterCode: `def two_sum(nums, target):
+    # Your code here
+    pass`,
   },
   {
     id: 2,
@@ -44,19 +44,19 @@ const SAMPLE_PROBLEMS = [
     examples: [
       {
         input: "x = 121",
-        output: "true",
+        output: "True",
         explanation: "121 reads as 121 from left to right and from right to left.",
       },
       {
         input: "x = -121",
-        output: "false",
+        output: "False",
         explanation: "From left to right, it reads -121. From right to left, it becomes 121-.",
       },
     ],
     constraints: ["-2^31 <= x <= 2^31 - 1"],
-    starterCode: `function solution(x) {
-    // Your code here
-};`,
+    starterCode: `def is_palindrome(x):
+    # Your code here
+    pass`,
   },
 ]
 
