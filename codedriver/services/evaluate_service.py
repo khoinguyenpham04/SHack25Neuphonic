@@ -1,6 +1,6 @@
 import os
 import json
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from services.driver import run_test_cases
 
@@ -20,7 +20,7 @@ def evaluate_problem(problem_name: str, user_code: str) -> Dict[str, Any]:
         A dictionary ready to be serialized and sent to the next service.
     """
     # Build the path to the test case file
-    test_case_path = os.path.join(TEST_CASES_DIR, f"{problem_name}.json")
+    test_case_path : str = os.path.join(TEST_CASES_DIR, f"{problem_name}.json")
 
     if not os.path.exists(test_case_path):
         raise FileNotFoundError(f"Test case file not found: {test_case_path}")
@@ -29,7 +29,7 @@ def evaluate_problem(problem_name: str, user_code: str) -> Dict[str, Any]:
     with open(test_case_path, "r") as f:
         test_case_data = json.load(f)
 
-    test_cases = test_case_data.get("test_cases", [])
+    test_cases : list[Any] = test_case_data.get("test_cases", [])
 
     results = run_test_cases(user_code, test_cases)
 
