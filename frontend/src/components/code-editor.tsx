@@ -24,6 +24,7 @@ interface CodeEditorProps {
 export default function CodeEditor({ problem }: CodeEditorProps) {
   const [code, setCode] = useState(problem.starterCode)
   const [output, setOutput] = useState("")
+  const [activeTab, setActiveTab] = useState("code")
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const highlightRef = useRef<HTMLPreElement>(null)
 
@@ -52,12 +53,13 @@ export default function CodeEditor({ problem }: CodeEditorProps) {
 
   const handleRunCode = () => {
     setOutput("Running test cases...\n\nTest case 1: Passed\nTest case 2: Passed\n\nAll test cases passed!")
+    setActiveTab("testcases")
   }
 
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="pb-0">
-        <Tabs defaultValue="code" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList>
             <TabsTrigger value="code">Code</TabsTrigger>
             <TabsTrigger value="testcases">Test Cases</TabsTrigger>
@@ -65,7 +67,7 @@ export default function CodeEditor({ problem }: CodeEditorProps) {
         </Tabs>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col pt-4">
-        <Tabs defaultValue="code" className="flex-1 flex flex-col">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
           <TabsContent value="code" className="flex-1 flex flex-col">
             <div className="flex-1 mb-4 relative h-[300px]">
               <MonacoEditor
@@ -93,11 +95,11 @@ export default function CodeEditor({ problem }: CodeEditorProps) {
               </Button>
               <Button onClick={handleRunCode}>Run Code</Button>
             </div>
-            {output && (
-              <div className="mt-4 p-3 bg-muted rounded-md font-mono text-xs whitespace-pre-wrap">{output}</div>
-            )}
           </TabsContent>
           <TabsContent value="testcases" className="space-y-4">
+            {output && (
+              <div className="mb-4 p-3 bg-muted rounded-md font-mono text-xs whitespace-pre-wrap">{output}</div>
+            )}
             <div className="rounded-md border p-4">
               <h3 className="font-medium text-sm mb-2">Example Test Cases</h3>
               {problem.examples.map((example, index) => (
