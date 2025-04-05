@@ -2,6 +2,8 @@ import argparse
 import json
 from aiohttp import web
 
+from codedriver.services.evaluate_service import evaluate_problem
+
 
 async def handle_get(request):
     return web.Response(text="GET not allowed", status=403, content_type="text/plain")
@@ -28,9 +30,20 @@ async def handle_post(request):
         # Process JSON data
         resp = await request
         data = resp.json()
-        # TODO: Implement evaluation logic
-        ...
-        return web.json_response({"status": 200, "body": "Succesfully hit /eval"})
+        problem_name = data.get("problem_name")
+        code = data.get("user_code")
+
+        if not problem_name or not code:
+            return web.json_response(
+                {"status": 400, "body": "`problem_name` and `code` must be provided in the JSON."},
+                status=400,
+            )
+        
+        evaluation_result = evaluate_problem(problem_name, code)
+
+        return web.json_response(
+            {"status": 200, "body": f"Received problem: {problem_name}, code length: {len(code)}"}
+        )
 
     except json.JSONDecodeError:
         return web.json_response(
