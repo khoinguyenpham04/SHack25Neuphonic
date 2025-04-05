@@ -1,0 +1,314 @@
+## Product Requirements Document (PRD): AI LeetCode Coach
+
+### 1. Project Overview
+**Objective**:  
+Develop an AI LeetCode Coach integrated into a Next.js application that provides real-time feedback on LeetCode problems. The coach will analyze the selected problem, user’s code, and voice/text input using an LLM (e.g., OpenAI’s GPT-4) to offer suggestions and improvements.
+
+**Scope**:  
+- Modify the existing dashboard to manage shared state for problems and code.
+- Enhance the chat sidebar to process voice and text input, integrating with an LLM via a new API route.
+- Ensure a seamless user experience with robust error handling and security.
+
+**Assumptions**:  
+- Your Next.js app uses TypeScript and has a basic structure with `dashboard.tsx`, `CodeEditor.tsx`, and `ChatSidebar.tsx`.
+- You have an OpenAI API key for LLM integration.
+- The Web Speech API is sufficient for initial voice transcription.
+
+---
+
+### 2. User Stories
+These user stories define how users will interact with the AI LeetCode Coach and serve as the foundation for the implementation steps.
+
+#### User Story 1: Select a LeetCode Problem
+- **Description**: As a user, I want to select a LeetCode problem and see its description, examples, and constraints.
+- **Acceptance Criteria**:
+  - The dashboard displays the problem title, description, examples, and constraints.
+  - Users can switch between problems, and the UI updates accordingly.
+
+#### User Story 2: Write and Edit Code
+- **Description**: As a user, I want to write and edit code for the selected problem.
+- **Acceptance Criteria**:
+  - The code editor allows editing, with changes reflected in a shared state.
+  - Users can run and test code, with results displayed.
+
+#### User Story 3: Use Voice Input
+- **Description**: As a user, I want to use voice input to ask questions about my code or the problem.
+- **Acceptance Criteria**:
+  - The chat sidebar transcribes voice input accurately using the Web Speech API.
+  - Transcribed text is sent to the LLM with the problem and code context.
+
+#### User Story 4: Receive AI Feedback
+- **Description**: As a user, I want to receive feedback from the AI coach in the chat sidebar.
+- **Acceptance Criteria**:
+  - The chat sidebar displays the AI’s response based on the problem, code, and user query.
+  - Feedback is relevant, helpful, and addresses specific questions or code issues.
+
+---
+
+### 3. Step-by-Step Implementation Plan
+This section provides detailed, actionable steps for your AI to code the AI LeetCode Coach. Each step includes specific instructions and code snippets where applicable.
+
+#### Step 1: Set Up Project Dependencies
+- **Objective**: Ensure all necessary libraries are installed.
+- **Actions**:
+  - Install OpenAI SDK for LLM integration:
+    ```bash
+    npm install openai
+    ```
+  - Verify Next.js and TypeScript are configured (`tsconfig.json` exists).
+  - Ensure CodeMirror (or your code editor library) is installed:
+    ```bash
+    npm install @uiw/react-codemirror codemirror
+    ```
+  - Add environment variable support:
+    - Create a `.env.local` file in the root directory.
+    - Add your OpenAI API key:
+      ```
+      OPENAI_API_KEY=your-api-key-here
+      ```
+
+#### Step 2: Modify `dashboard.tsx` for State Management
+- **Objective**: Centralize state for the selected problem and code, passing it to child components.
+- **Actions**:
+  - Update `dashboard.tsx` to manage state and render components:
+    ```tsx
+    // dashboard.tsx
+    import { useState, useEffect } from 'react';
+    import CodeEditor from './CodeEditor';
+    import ChatSidebar from './ChatSidebar';
+
+    // Sample problem data (replace with real data or API call)
+    const problems = [
+      { id: 1, title: 'Two Sum', description: 'Given an array of integers...', examples: ['[2,7,11,15], target=9'], constraints: '...' },
+      // Add more problems as needed
+    ];
+
+    export default function Dashboard() {
+      const [selectedProblem, setSelectedProblem] = useState(problems[0]);
+      const [code, setCode] = useState('// Start coding here');
+
+      useEffect(() => {
+        setCode('// Starter code for ' + selectedProblem.title);
+      }, [selectedProblem]);
+
+      return (
+        <div style={{ display: 'flex' }}>
+          <div style={{ flex: 1 }}>
+            <h1>{selectedProblem.title}</h1>
+            <p>{selectedProblem.description}</p>
+            <h3>Examples:</h3>
+            <ul>{selectedProblem.examples.map((ex, i) => <li key={i}>{ex}</li>)}</ul>
+            <h3>Constraints:</h3>
+            <p>{selectedProblem.constraints}</p>
+            <CodeEditor code={code} setCode={setCode} />
+          </div>
+          <ChatSidebar selectedProblem={selectedProblem} code={code} />
+        </div>
+      );
+    }
+    ```
+
+#### Step 3: Update `CodeEditor.tsx` to Use Props
+- **Objective**: Make the code editor a controlled component using props from `dashboard.tsx`.
+- **Actions**:
+  - Modify `CodeEditor.tsx`:
+    ```tsx
+    // CodeEditor.tsx
+    import CodeMirror from '@uiw/react-codemirror';
+    import { javascript } from '@codemirror/lang-javascript';
+
+    interface CodeEditorProps {
+      code: string;
+      setCode: (code: string) => void;
+    }
+
+    export default function CodeEditor({ code, setCode }: CodeEditorProps) {
+      return (
+        <CodeMirror
+          value={code}
+          height="400px"
+          extensions={[javascript()]}
+          onChange={(value) => setCode(value)}
+        />
+      );
+    }
+    ```
+
+#### Step 4: Enhance `ChatSidebar.tsx` for Voice and AI Interaction
+- **Objective**: Add voice input and LLM feedback to the chat sidebar.
+- **Actions**:
+  - Update `ChatSidebar.tsx`:
+    ```tsx
+    // ChatSidebar.tsx
+    import { useState } from 'react';
+
+    interface ChatSidebarProps {
+      selectedProblem: { title: string; description: string; examples: string[]; constraints: string };
+      code: string;
+    }
+
+    export default function ChatSidebar({ selectedProblem, code }: ChatSidebarProps) {
+      const [messages, setMessages] = useState<{ text: string; isUser: boolean }[]>([]);
+      const [input, setInput] = useState('');
+      const [isRecording, setIsRecording] = useState(false);
+
+      const recognition = typeof window !== 'undefined' ? new (window as any).webkitSpeechRecognition() : null;
+      if (recognition) {
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          setInput(transcript);
+          handleSendMessage(transcript);
+        };
+      }
+
+      const startRecording = () => {
+        if (recognition) {
+          setIsRecording(true);
+          recognition.start();
+        }
+      };
+
+      const stopRecording = () => {
+        if (recognition) {
+          setIsRecording(false);
+          recognition.stop();
+        }
+      };
+
+      const handleSendMessage = async (message: string = input) => {
+        if (!message.trim()) return;
+
+        const userMessage = { text: message, isUser: true };
+        setMessages((prev) => [...prev, userMessage]);
+        setInput('');
+
+        const prompt = `
+          Problem: ${selectedProblem.title}
+          Description: ${selectedProblem.description}
+          Code: ${code}
+          User Query: ${message}
+          Provide detailed feedback or suggestions based on the above.
+        `;
+
+        try {
+          const res = await fetch('/api/llm', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt }),
+          });
+          const data = await res.json();
+          const aiMessage = { text: data.response, isUser: false };
+          setMessages((prev) => [...prev, aiMessage]);
+        } catch (error) {
+          const errorMessage = { text: 'Error fetching AI response', isUser: false };
+          setMessages((prev) => [...prev, errorMessage]);
+        }
+      };
+
+      return (
+        <div style={{ width: '300px', padding: '10px', borderLeft: '1px solid #ccc' }}>
+          <div style={{ height: '80%', overflowY: 'auto' }}>
+            {messages.map((msg, i) => (
+              <p key={i} style={{ textAlign: msg.isUser ? 'right' : 'left' }}>
+                {msg.text}
+              </p>
+            ))}
+          </div>
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            style={{ width: '100%', marginBottom: '10px' }}
+          />
+          <button onClick={() => handleSendMessage()}>Send</button>
+          <button onClick={isRecording ? stopRecording : startRecording}>
+            {isRecording ? 'Stop Recording' : 'Record Voice'}
+          </button>
+        </div>
+      );
+    }
+    ```
+
+#### Step 5: Create `pages/api/llm.ts` for LLM Integration
+- **Objective**: Build a secure API route to interact with the OpenAI LLM.
+- **Actions**:
+  - Create `pages/api/llm.ts`:
+    ```ts
+    // pages/api/llm.ts
+    import type { NextApiRequest, NextApiResponse } from 'next';
+    import OpenAI from 'openai';
+
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+
+    export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+      if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
+      }
+
+      const { prompt } = req.body;
+
+      try {
+        const completion = await openai.chat.completions.create({
+          model: 'gpt-4',
+          messages: [{ role: 'user', content: prompt }],
+          max_tokens: 500,
+        });
+
+        const response = completion.choices[0].message.content;
+        res.status(200).json({ response });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to fetch LLM response' });
+      }
+    }
+    ```
+
+#### Step 6: Test and Debug
+- **Objective**: Ensure all components work together seamlessly.
+- **Actions**:
+  - Run the Next.js app:
+    ```bash
+    npm run dev
+    ```
+  - Test each user story:
+    - Select a problem and verify the UI updates.
+    - Edit code and confirm state updates in `ChatSidebar`.
+    - Use voice input (click "Record Voice") and check transcription.
+    - Send a message and verify AI feedback appears.
+  - Debug issues (e.g., API errors, transcription failures) using console logs and error messages.
+
+---
+
+### 4. Edge Cases and Considerations
+Handle these potential issues to ensure robustness:
+
+- **Token Limits**:
+  - Keep prompts under 4096 tokens (GPT-4 limit). Truncate code or description if needed.
+- **Security**:
+  - Ensure `OPENAI_API_KEY` is in `.env.local` and not committed to version control (add `.env.local` to `.gitignore`).
+- **Performance**:
+  - Monitor OpenAI API rate limits and add a delay or retry logic if exceeded.
+- **Error Handling**:
+  - Display user-friendly messages for network or API failures in `ChatSidebar`.
+- **Voice Input**:
+  - Test Web Speech API in supported browsers (Chrome, Edge). Add a fallback for unsupported browsers.
+
+---
+
+### 5. Non-Functional Requirements
+- **Usability**: Ensure the UI is intuitive with clear buttons and feedback display.
+- **Scalability**: Design for multiple users by optimizing API calls.
+- **Maintainability**: Use consistent naming and add comments where needed.
+
+---
+
+### 6. Conclusion
+This PRD provides a complete, step-by-step guide for your AI to implement the AI LeetCode Coach. By following these steps, your Next.js application will feature a functional dashboard, code editor, and chat sidebar with voice input and LLM-powered feedback. Future enhancements could include better transcription (e.g., Google Cloud Speech-to-Text) or additional LeetCode problem integrations.
+
+--- 
+
+This PRD is ready to be fed into your AI for coding. Let me know if you need adjustments!

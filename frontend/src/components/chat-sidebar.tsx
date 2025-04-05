@@ -20,11 +20,46 @@ type Message = {
   content: string
   sender: "user" | "bot"
   timestamp: Date
+  type?: "feedback" | "chat"
 }
 
-export default function ChatSidebar() {
+interface ChatSidebarProps {
+  code: string
+  selectedProblem: {
+    id: number
+    title: string
+    difficulty: string
+    description: string
+    examples: {
+      input: string
+      output: string
+      explanation?: string
+    }[]
+    constraints: string[]
+    starterCode: string
+  }
+}
+
+export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps) {
   const [isRecording, setIsRecording] = useState(false)
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(null)
+
+  useEffect(() => {
+    // Listen for AI analysis feedback
+    const handleAIAnalysis = (event: CustomEvent<{ feedback: string }>) => {
+      const feedbackMessage: Message = {
+        id: Date.now().toString(),
+        content: event.detail.feedback,
+        sender: "bot",
+        timestamp: new Date(),
+        type: "feedback"
+      }
+      setMessages(prev => [...prev, feedbackMessage])
+    }
+
+    window.addEventListener('aiAnalysis', handleAIAnalysis as EventListener)
+    return () => window.removeEventListener('aiAnalysis', handleAIAnalysis as EventListener)
+  }, [])
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -90,17 +125,33 @@ export default function ChatSidebar() {
     setMessages((prev) => [...prev, userMessage])
     setInputValue("")
 
-    // Simulate bot response
-    setTimeout(() => {
-      const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content:
-          "I can help with that! For the Two Sum problem, consider using a hash map to track the numbers you've seen. This allows you to check if the complement (target - current number) exists in O(1) time.",
-        sender: "bot",
-        timestamp: new Date(),
-      }
-      setMessages((prev) => [...prev, botMessage])
-    }, 1000)
+    // Send user's question to AI analysis endpoint
+    fetch('/api/analyse', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        code,
+        language: 'python',
+        problemDescription: selectedProblem.description,
+        userInput: text,
+      }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        const botMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: data.feedback || "I'll help you analyze your code and provide suggestions for improvement.",
+          sender: "bot",
+          timestamp: new Date(),
+          type: "chat"
+        }
+        setMessages((prev) => [...prev, botMessage])
+      })
+      .catch(error => {
+        console.error('Error getting AI response:', error)
+      })
   }
 
   return (

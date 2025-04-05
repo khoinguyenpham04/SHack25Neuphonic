@@ -5,10 +5,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import  Editor from '@uiw/react-codemirror';
+import Editor from '@uiw/react-codemirror';
 import { python } from '@codemirror/lang-python';
 import { foldGutter } from '@codemirror/language';
 import { EditorView } from '@codemirror/view';
+import { Bot } from 'lucide-react';
 import { evaluateUserCode } from "@/services/evaluateCode"
 
 interface Problem {
@@ -30,10 +31,11 @@ interface CodeEditorProps {
   problems: Problem[]
   onSelectProblem: (problem: Problem) => void
   selectedProblemId: number
+  code: string
+  setCode: (code: string) => void
 }
 
-export default function CodeEditor({ problem, problems, onSelectProblem, selectedProblemId }: CodeEditorProps) {
-  const [code, setCode] = useState(problem.starterCode)
+export default function CodeEditor({ problem, problems, onSelectProblem, selectedProblemId, code, setCode }: CodeEditorProps) {
   const [output, setOutput] = useState("")
   const [activeTab, setActiveTab] = useState("code")
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -52,10 +54,7 @@ export default function CodeEditor({ problem, problems, onSelectProblem, selecte
     }
   }
 
-  // Update code when problem changes
-  useEffect(() => {
-    setCode(problem.starterCode)
-  }, [problem.starterCode])
+
 
   // Sync scroll between textarea and highlighted code
   useEffect(() => {
@@ -89,6 +88,37 @@ export default function CodeEditor({ problem, problems, onSelectProblem, selecte
     setActiveTab("testcases")
   }
 
+  const handleAIAnalysis = async () => {
+    try {
+      const response = await fetch('/api/analyse', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code,
+          language: 'python',
+          problemDescription: problem.description,
+          examples: problem.examples,
+          constraints: problem.constraints
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get AI analysis');
+      }
+
+      const data = await response.json();
+      const analysisEvent = new CustomEvent('aiAnalysis', {
+        detail: { feedback: data.feedback }
+      });
+      window.dispatchEvent(analysisEvent);
+    } catch (error) {
+      console.error('Error getting AI analysis:', error);
+      setOutput('Failed to analyze code. Please try again.');
+    }
+  }
+
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="pb-0">
@@ -116,7 +146,18 @@ export default function CodeEditor({ problem, problems, onSelectProblem, selecte
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button className="bg-green-500 hover:bg-green-600 text-white">Submit</Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleAIAnalysis}
+                  className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2"
+                >
+                  <Bot size={16} />
+                  Get AI Feedback
+                </Button>
+                <div className="flex gap-2">
+                <Button className="bg-green-500 hover:bg-green-600 text-white">Submit</Button>
+              </div>
+              </div>
             </div>
           </div>
         </Tabs>
