@@ -93,7 +93,7 @@ export default function CodeEditor({ problem }: CodeEditorProps) {
               <Button variant="outline" onClick={() => setCode(problem.starterCode)}>
                 Reset
               </Button>
-              <Button onClick={handleRunCode}>Run Code</Button>
+              <Button className="bg-green-500 hover:bg-green-600 text-white" onClick={handleRunCode}>Run Code</Button>
             </div>
           </TabsContent>
           <TabsContent value="testcases" className="space-y-4">
@@ -114,7 +114,7 @@ export default function CodeEditor({ problem }: CodeEditorProps) {
                 className="w-full h-20 p-2 rounded-md border text-xs font-mono"
                 placeholder="Enter your custom test case here..."
               />
-              <Button size="sm" className="mt-2">
+              <Button size="sm" className="mt-2 bg-green-500 hover:bg-green-600 text-white">
                 Run
               </Button>
             </div>

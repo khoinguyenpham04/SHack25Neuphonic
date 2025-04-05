@@ -70,8 +70,10 @@ const MonacoEditor = ({
       monacoEditorRef.current = editor
 
       return () => {
-        editor.dispose()
-        monacoEditorRef.current = null
+        if (monacoEditorRef.current) {
+          monacoEditorRef.current.dispose()
+          monacoEditorRef.current = null
+        }
       }
     }
   }, []) // Empty dependency array to initialize only once

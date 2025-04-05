@@ -62,7 +62,7 @@ export default function Header({ problems, onSelectProblem, selectedProblemId }:
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button>Submit</Button>
+          <Button className="bg-green-500 hover:bg-green-600 text-white">Submit</Button>
         </div>
       </div>
     </header>
