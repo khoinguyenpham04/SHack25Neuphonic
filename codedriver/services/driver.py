@@ -187,45 +187,47 @@ def run_test_cases(user_code: str, test_cases: List[Dict[str, Any]]) -> List[Dic
     return results
 
 
-def main() -> None:
-    # Example JSON structure with test cases.
-    json_data = '''
-    {
-      "test_cases": [
-        {
-          "input": [1, 2],
-          "expected_output": 3
-        },
-        {
-          "input": [5, 7],
-          "expected_output": 12
-        },
-        {
-          "input": [0, 0],
-          "expected_output": 0
-        },
-        {
-          "input": [-1, 1],
-          "expected_output": 0
-        },
-        {
-          "input": [10, -5],
-          "expected_output": 5
-        }
-      ]
-    }
-    '''
-    data = json.loads(json_data)
-    test_cases = data["test_cases"]
+# TESTING
 
-    # Example user code string that defines a function `solution`
-    user_code = '''
+# def main() -> None:
+#     # Example JSON structure with test cases.
+#     json_data = '''
+#     {
+#       "test_cases": [
+#         {
+#           "input": [1, 2],
+#           "expected_output": 3
+#         },
+#         {
+#           "input": [5, 7],
+#           "expected_output": 12
+#         },
+#         {
+#           "input": [0, 0],
+#           "expected_output": 0
+#         },
+#         {
+#           "input": [-1, 1],
+#           "expected_output": 0
+#         },
+#         {
+#           "input": [10, -5],
+#           "expected_output": 5
+#         }
+#       ]
+#     }
+#     '''
+#     data = json.loads(json_data)
+#     test_cases = data["test_cases"]
 
-'''
+#     # Example user code string that defines a function `solution`
+#     user_code = '''
 
-    results = run_test_cases(user_code, test_cases)
-    for result in results:
-        print(result)
+# '''
 
-if __name__ == "__main__":
-    main()
+#     results = run_test_cases(user_code, test_cases)
+#     for result in results:
+#         print(result)
+
+# if __name__ == "__main__":
+#     main()
