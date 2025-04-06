@@ -47,7 +47,6 @@ export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps)
 
   // Remove the unused state since it's only used in handleSpeechResult
   const [, setInputValue] = useState("")
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
 
   const handleSendMessage = useCallback((text: string) => {
@@ -76,23 +75,7 @@ export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps)
         (async () => {
           if (data.feedback) {
             console.log(data.feedback)
-            try {
-              
-              const res = await fetch(`/api/tts?msg=${data.feedback}`);
-              if (!res.ok) {
-                throw new Error(`Failed to fetch TTS: ${res.statusText}`);
-              }
 
-              const arrayBuffer = await res.arrayBuffer();
-              const blob = new Blob([arrayBuffer], { type: 'audio/wav' });
-              const url = URL.createObjectURL(blob);
-              setAudioUrl(url);
-
-              const audio = new Audio(url);
-              audio.play();
-            } catch (error) {
-              console.error("TTS fetch/playback error:", error);
-            }
           }
 
           const botMessage: Message = {
@@ -203,14 +186,7 @@ export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps)
 
       <SidebarFooter className="p-3 border-t flex-shrink-0">
         <div className="flex flex-col items-center gap-4">
-          {audioUrl && (
-            <audio
-              className="w-full"
-              controls
-              src={audioUrl}
-              onEnded={() => setAudioUrl(null)}
-            />
-          )}
+
           {isRecording && (
             <div className="w-full h-48">
               <AudioVisualizer />
