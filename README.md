@@ -1,19 +1,13 @@
 <div align="center">
 
-<h3 align="center">LeetCoach</h3>
+  <h3 align="center">LeetCoach</h3>
+
+  <img src="frontend/public/images/landing.png" alt="LeetCoach Landing Page" width="800"/>
 
   <p align="center">
     AI-powered LeetCode practice tool with real-time feedback and voice-enabled support.
   </p>
-</div>
-
-<!-- REMOVE THIS IF YOU DON'T HAVE A DEMO -->
-<!-- TIP: You can alternatively directly upload a video up to 100MB by dropping it in while editing the README on GitHub. This displays a video player directly on GitHub instead of making it so that you have to click an image/link -->
-<div align="center">
-  <a href="https://github.com/user-attachments/assets/f45c9ee9-ad2f-40f4-bb60-e9bbd1472c45">
-    <img src="https://github.com/user-attachments/assets/f45c9ee9-ad2f-40f4-bb60-e9bbd1472c45" alt="Project Demo">
-    <p>Watch Demo Video</p>
-  </a>
+  
 </div>
 
 ## Table of Contents
@@ -55,7 +49,10 @@ LeetCoach is an AI-powered LeetCode companion designed to help users master codi
 
 ## Architecture
 
-![Architecture Diagram](https://github.com/user-attachments/assets/75adc7aa-7719-4c4f-a9bb-3ba847e12e9f)
+<!-- ![Architecture Diagram](frontend/public/images/architecture.png) -->
+<div align="center">
+  <img src="frontend/public/images/architecture.png" alt="LeetCoach Architecture Diagram" width="800"/>
+</div>
 
 The LeetCoach project is structured with a Next.js frontend and a Python backend (codedriver) for code evaluation.
 
