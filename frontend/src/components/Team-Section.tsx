@@ -16,7 +16,7 @@ const members = [
     {
         name: 'Noah Pham',
         role: 'Sofware Engineer',
-        avatar: 'https://alt.tailus.io/images/team/member-three.webp',
+        avatar: '/images/noah.JPG',
         link: '#',
     },
     {
