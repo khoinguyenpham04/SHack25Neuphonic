@@ -11,12 +11,13 @@ declare global {
 }
 
 import { useState, useEffect, useCallback, useRef } from "react"
-import { Mic, MicOff, Bot, User } from "lucide-react"
+import { Mic, MicOff, Bot, User, Volume2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sidebar, SidebarContent, SidebarHeader, SidebarFooter } from "@/components/ui/sidebar"
 import { AudioVisualizer } from "./AudioVisualizer"
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition"
 import { getAiAnalysis } from "@/services/fetchAiAnalysis"
+import { generateSpeech, playAudioBuffer } from "@/services/textToSpeech"
 
 type Message = {
   id: string
@@ -175,6 +176,24 @@ export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps)
                 <div className="flex items-center gap-2 mb-1">
                   {message.sender === "bot" ? <Bot size={14} /> : <User size={14} />}
                   <span className="text-xs font-medium">{message.sender === "user" ? "You" : "Assistant"}</span>
+                  {message.sender === "bot" && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 ml-auto"
+                      onClick={async () => {
+                        try {
+                          const audioBuffer = await generateSpeech({ text: message.content });
+                          await playAudioBuffer(audioBuffer);
+                        } catch (error) {
+                          console.error('Error playing audio:', error);
+                        }
+                      }}
+                    >
+                      <Volume2 size={14} />
+                      <span className="sr-only">Play message</span>
+                    </Button>
+                  )}
                 </div>
                 <p className="text-sm">{message.content}</p>
               </div>

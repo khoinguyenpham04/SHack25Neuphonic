@@ -24,6 +24,7 @@
     "monaco-editor": "^0.52.2",
     "motion": "^12.6.3",
     "next": "15.2.4",
+    "openai": "^4.91.1",
     "prism-react-renderer": "^2.4.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
