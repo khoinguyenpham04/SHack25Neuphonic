@@ -112,9 +112,9 @@ export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps)
   }, [])
 
   // Microphone To Text Hook useSpee
-  const onSpeechResult = useCallback((transcript: string) => {
-    setInputValue(transcript)
-  }, [])
+  // const onSpeechResult = useCallback((transcript: string) => {
+  //   setInputValue(transcript)
+  // }, [])
 
   const handleSpeechResult = useCallback((transcript: string) => {
     setInputValue(transcript)
