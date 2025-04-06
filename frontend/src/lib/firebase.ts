@@ -30,6 +30,8 @@ const googleProvider = new GoogleAuthProvider();
 export const signInWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, googleProvider);
+    const token = await result.user.getIdToken();
+    document.cookie = `token=${token}; path=/; secure; samesite=lax`;
     return result.user;
   } catch (error) {
     console.error("Error signing in with Google:", error);
