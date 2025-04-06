@@ -203,6 +203,14 @@ export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps)
 
       <SidebarFooter className="p-3 border-t flex-shrink-0">
         <div className="flex flex-col items-center gap-4">
+          {audioUrl && (
+            <audio
+              className="w-full"
+              controls
+              src={audioUrl}
+              onEnded={() => setAudioUrl(null)}
+            />
+          )}
           {isRecording && (
             <div className="w-full h-48">
               <AudioVisualizer />
