@@ -5,28 +5,8 @@ import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import { IconBrandCodesandbox } from '@tabler/icons-react'
 import { TextEffect } from '@/components/ui/text-effect'
-import { AnimatedGroup } from '@/components/ui/animated-group'
 import TeamSection from '@/components/Team-Section'
-
-const transitionVariants = {
-    item: {
-        hidden: {
-            opacity: 0,
-            filter: 'blur(12px)',
-            y: 12,
-        },
-        visible: {
-            opacity: 1,
-            filter: 'blur(0px)',
-            y: 0,
-            transition: {
-                type: 'spring',
-                bounce: 0.3,
-                duration: 1.5,
-            },
-        },
-    },
-}
+import './animations.css'
 
 export default function HeroSection() {
     return (
@@ -63,32 +43,7 @@ export default function HeroSection() {
                 </div>
                 <section>
                     <div className="relative pt-24 md:pt-36">
-                        <AnimatedGroup
-                            variants={{
-                                container: {
-                                    visible: {
-                                        transition: {
-                                            delayChildren: 1,
-                                        },
-                                    },
-                                },
-                                item: {
-                                    hidden: {
-                                        opacity: 0,
-                                        y: 20,
-                                    },
-                                    visible: {
-                                        opacity: 1,
-                                        y: 0,
-                                        transition: {
-                                            type: 'spring',
-                                            bounce: 0.3,
-                                            duration: 2,
-                                        },
-                                    },
-                                },
-                            }}
-                            className="absolute inset-0 -z-20">
+                        <div className="absolute inset-0 -z-20 animate-fade-in-up animate-delay-1">
                             <Image
                                 src="/images/hero-img.png"
                                 alt="Code visualization background"
@@ -97,11 +52,11 @@ export default function HeroSection() {
                                 height={4095}
                                 priority
                             />
-                        </AnimatedGroup>
+                        </div>
                         <div className="absolute inset-0 -z-10 size-full [background:radial-gradient(125%_125%_at_50%_100%,transparent_0%,var(--color-background)_75%)]"></div>
                         <div className="mx-auto max-w-7xl px-6">
                             <div className="text-center sm:mx-auto lg:mr-auto lg:mt-0">
-                                <AnimatedGroup variants={transitionVariants}>
+                                <div className="transition-all duration-500 ease-in-out">
                                     <Link
                                         href="#link"
                                         className="hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-md shadow-zinc-950/5 transition-colors duration-300 dark:border-t-white/5 dark:shadow-zinc-950">
@@ -119,7 +74,7 @@ export default function HeroSection() {
                                             </div>
                                         </div>
                                     </Link>
-                                </AnimatedGroup>
+                                </div>
 
                                 <TextEffect
                                     preset="fade-in-blur"
@@ -138,19 +93,7 @@ export default function HeroSection() {
                                     The LeetCode companion that provides real-time feedback, personalized guidance, and voice-enabled support to accelerate your interview preparation.
                                 </TextEffect>
 
-                                <AnimatedGroup
-                                    variants={{
-                                        container: {
-                                            visible: {
-                                                transition: {
-                                                    staggerChildren: 0.05,
-                                                    delayChildren: 0.75,
-                                                },
-                                            },
-                                        },
-                                        ...transitionVariants,
-                                    }}
-                                    className="mt-12 flex flex-col items-center justify-center gap-2 md:flex-row">
+                                <div className="mt-12 flex flex-col items-center justify-center gap-2 md:flex-row animate-stagger animate-fade-in-blur animate-delay-075">
                                     <div
                                         key={1}
                                         className="bg-foreground/10 rounded-[calc(var(--radius-xl)+0.125rem)] border p-0.5">
@@ -173,22 +116,11 @@ export default function HeroSection() {
                                             <span className="text-nowrap">Request a demo</span>
                                         </Link>
                                     </Button>
-                                </AnimatedGroup>
+                                </div>
                             </div>
                         </div>
 
-                        <AnimatedGroup
-                            variants={{
-                                container: {
-                                    visible: {
-                                        transition: {
-                                            staggerChildren: 0.05,
-                                            delayChildren: 0.75,
-                                        },
-                                    },
-                                },
-                                ...transitionVariants,
-                            }}>
+                        <div className="animate-stagger animate-fade-in-blur animate-delay-075">
                             <div className="relative -mr-56 mt-8 overflow-hidden px-2 sm:mr-0 sm:mt-12 md:mt-20">
                                 <div
                                     aria-hidden
@@ -211,7 +143,7 @@ export default function HeroSection() {
                                     />
                                 </div>
                             </div>
-                        </AnimatedGroup>
+                        </div>
                     </div>
                 </section>
                 <section>
