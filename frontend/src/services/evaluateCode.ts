@@ -23,7 +23,14 @@ export async function evaluateUserCode(problem: number, code: string): Promise<T
 
     const rawTestResults = data?.body?.testResults || data?.testResults || []
 
-    const testResults: TestResultList = rawTestResults.map((test: any) => ({
+    const testResults: TestResultList = rawTestResults.map((test: {
+      test_case: number;
+      input: unknown;
+      expected_output: unknown;
+      user_output: unknown;
+      execution_time: number;
+      success: boolean;
+    }) => ({
       testNumber: test.test_case ?? -1,
       input: JSON.stringify(test.input),
       expectedOutput: JSON.stringify(test.expected_output),
