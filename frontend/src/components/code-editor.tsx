@@ -11,7 +11,6 @@ import { foldGutter } from '@codemirror/language';
 import { EditorView } from '@codemirror/view';
 import { Bot } from 'lucide-react';
 import { evaluateUserCode } from "@/services/evaluateCode"
-import { fetchAiAnaysis } from "@/services/fetchAiAnalysis"
 import { TestCaseResults } from "./test-case-results"
 import { TestResultList } from "@/types/testResults"
 
@@ -91,17 +90,17 @@ export default function CodeEditor({ problem, problems, onSelectProblem, selecte
   }
 
   const handleAIAnalysis = async () => {
-    try {
-      const response = await fetchAiAnaysis(code, problem.description)
-      const analysisEvent = new CustomEvent('aiAnalysis', {
-        detail: { feedback: response.feedback }
-      });
-      window.dispatchEvent(analysisEvent);
+    // try {
+    //   const response = await fetchAiAnaysis(code, problem.description)
+    //   const analysisEvent = new CustomEvent('aiAnalysis', {
+    //     detail: { feedback: response.feedback }
+    //   });
+    //   window.dispatchEvent(analysisEvent);
 
-    } catch (err) {
-      setOutput('Failed to analyze code. Please try again.');
+    // } catch (err) {
+    //   setOutput('Failed to analyze code. Please try again.');
 
-    }
+    // }
 
   }
 

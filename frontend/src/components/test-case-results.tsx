@@ -9,6 +9,7 @@ interface TestCaseResultsProps {
 }
 
 export function TestCaseResults({ testCases }: TestCaseResultsProps) {
+
   return (
     <div className="space-y-4">
       <div className="rounded-md border">
@@ -43,7 +44,8 @@ export function TestCaseResults({ testCases }: TestCaseResultsProps) {
                 {test.userOutput}
               </div>
               <div className="text-muted-foreground">
-                {test.executionTime}
+
+                {(parseFloat(test.executionTime) * 1000).toFixed(3)} ms
               </div>
             </div>
           ))}

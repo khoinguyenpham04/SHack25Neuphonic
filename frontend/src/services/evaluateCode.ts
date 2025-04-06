@@ -30,7 +30,7 @@ export async function evaluateUserCode(problem: number, code: string): Promise<T
       userOutput: JSON.stringify(test.user_output),
       executionTime:
         typeof test.execution_time === "number"
-          ? test.execution_time.toFixed(4)
+          ? test.execution_time.toFixed(8)
           : "N/A",
       success: !!test.success,
       message: test.success ? "Passed" : "Failed"
