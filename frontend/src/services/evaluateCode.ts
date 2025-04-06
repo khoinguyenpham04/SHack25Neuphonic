@@ -1,9 +1,11 @@
 import { TestResultList } from "@/types/testResults"
 
 export async function evaluateUserCode(problem: number, code: string): Promise<TestResultList> {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://34.147.180.254:3001";
+  console.log("Using API URL:", apiUrl);
 
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/eval`, {
+    const response = await fetch(`${apiUrl}/eval`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
