@@ -1,0 +1,44 @@
+{
+    "test_cases": [
+      {
+        "input": ["abcabcbb"],
+        "expected_output": [3]
+      },
+      {
+        "input": ["bbbbb"],
+        "expected_output": [1]
+      },
+      {
+        "input": ["pwwkew"],
+        "expected_output": [3]
+      },
+      {
+        "input": [""],
+        "expected_output": [0]
+      },
+      {
+        "input": [" "],
+        "expected_output": [1]
+      },
+      {
+        "input": ["au"],
+        "expected_output": [2]
+      },
+      {
+        "input": ["dvdf"],
+        "expected_output": [3]
+      },
+      {
+        "input": ["abba"],
+        "expected_output": [2]
+      },
+      {
+        "input": ["abcdeabcde"],
+        "expected_output": [5]
+      },
+      {
+        "input": ["aabbcc"],
+        "expected_output": [2]
+      }
+    ]
+  }

@@ -22,7 +22,7 @@ const members = [
     {
         name: 'Joshua Alliet',
         role: 'Sofware Engineer',
-        avatar: 'https://alt.tailus.io/images/team/member-four.webp',
+        avatar: 'https://cdn.discordapp.com/attachments/1356394570329362625/1358315962054607080/94D131A9-C60E-4409-98D7-083E7B6DEE6F_1_102_a.jpeg?ex=67f365d1&is=67f21451&hm=5339290665a79d8a2b4a0062b5d5f83cb05041580abe385a7a936afb473cf7f9&',
         link: '#',
     },
 ]
