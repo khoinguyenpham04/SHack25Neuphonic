@@ -31,7 +31,7 @@ const SAMPLE_PROBLEMS = [
       "-10^9 <= target <= 10^9",
       "Only one valid answer exists.",
     ],
-    starterCode: `def two_sum(nums, target):
+    starterCode: `def solution(nums, target):
     # Your code here
     pass`,
   },

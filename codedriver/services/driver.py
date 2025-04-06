@@ -16,7 +16,7 @@ def _ast_check_no_imports(user_code: str, allowed_imports: set) -> None:
         # Check plain import statements: 'import xyz'
         if isinstance(node, ast.Import):
             for alias in node.names:
-                print(alias.name)
+                
                 if alias.name not in allowed_imports:
                     raise ValueError(f"Import of '{alias.name}' is not allowed.")
         # Check 'from xyz import abc' statements

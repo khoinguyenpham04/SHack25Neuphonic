@@ -13,7 +13,7 @@ import { Bot } from 'lucide-react';
 import { evaluateUserCode } from "@/services/evaluateCode"
 import { fetchAiAnaysis } from "@/services/fetchAiAnalysis"
 import { TestCaseResults } from "./test-case-results"
-import { sampleTestResults, TestResult } from "@/services/sampleTestResults"
+import { TestResultList } from "@/types/testResults"
 
 interface Problem {
   id: number
@@ -41,7 +41,7 @@ interface CodeEditorProps {
 export default function CodeEditor({ problem, problems, onSelectProblem, selectedProblemId, code, setCode }: CodeEditorProps) {
   const [output, setOutput] = useState("")
   const [activeTab, setActiveTab] = useState("code")
-  const [testResults, setTestResults] = useState<TestResult[]>([])
+  const [testResults, setTestResults] = useState<TestResultList>([])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const highlightRef = useRef<HTMLPreElement>(null)
 
@@ -78,10 +78,11 @@ export default function CodeEditor({ problem, problems, onSelectProblem, selecte
     return () => textarea.removeEventListener("scroll", handleScroll)
   }, [])
 
+
   const handleRunCode = async () => {
     try {
-      // Using sample test results for UI testing
-      setTestResults(sampleTestResults)
+      const response = await evaluateUserCode(problem.id, code)
+      setTestResults(response)
       setActiveTab("testcases")
     } catch (err) {
       setOutput("An error occurred during code evaluation." + err)
@@ -182,16 +183,6 @@ export default function CodeEditor({ problem, problems, onSelectProblem, selecte
                 ))}
               </div>
             )}
-            <div className="rounded-md border p-4">
-              <h3 className="font-medium text-sm mb-2">Add Custom Test Case</h3>
-              <textarea
-                className="w-full h-20 p-2 rounded-md border text-xs font-mono"
-                placeholder="Enter your custom test case here..."
-              />
-              <Button size="sm" className="mt-2 bg-green-500 hover:bg-green-600 text-white">
-                Run
-              </Button>
-            </div>
           </TabsContent>
         </Tabs>
       </CardContent>

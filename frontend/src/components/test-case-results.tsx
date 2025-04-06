@@ -1,19 +1,11 @@
 "use client"
 
+import { TestResultList } from "@/types/testResults"
 import { CheckCircle2, XCircle } from "lucide-react"
 
-interface TestCase {
-  testNumber: number
-  input: string
-  expectedOutput: string
-  userOutput: string
-  executionTime: string
-  success: boolean
-  message: string
-}
 
 interface TestCaseResultsProps {
-  testCases: TestCase[]
+  testCases: TestResultList
 }
 
 export function TestCaseResults({ testCases }: TestCaseResultsProps) {
