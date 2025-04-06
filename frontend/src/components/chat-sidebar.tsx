@@ -45,10 +45,11 @@ interface ChatSidebarProps {
 export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps) {
 
   const [inputValue, setInputValue] = useState("")
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
 
   const handleSendMessage = useCallback((text: string) => {
-    if (!text.trim()) return
+    if (!text.trim()) return;
 
     // 1) Add user message
     const userMessage: Message = {
@@ -56,9 +57,9 @@ export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps)
       content: text,
       sender: "user",
       timestamp: new Date(),
-    }
-    setMessages((prev) => [...prev, userMessage])
-    setInputValue("")
+    };
+    setMessages((prev) => [...prev, userMessage]);
+    setInputValue("");
 
     // 2) Fetch AI response
     getAiAnalysis({
@@ -67,29 +68,52 @@ export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps)
       problemDescription: selectedProblem.description,
       userInput: text,
     })
-      .then(data => {
-        const botMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          content: data.feedback || "No feedback returned",
-          sender: "bot",
-          timestamp: new Date(),
-          type: "chat"
-        }
-        setMessages((prev) => [...prev, botMessage])
+      .then((data) => {
+        // Process AI response inside an async IIFE
+        (async () => {
+          if (data.feedback) {
+            console.log(data.feedback)
+            try {
+              
+              const res = await fetch(`/api/tts?msg=${data.feedback}`);
+              if (!res.ok) {
+                throw new Error(`Failed to fetch TTS: ${res.statusText}`);
+              }
+
+              const arrayBuffer = await res.arrayBuffer();
+              const blob = new Blob([arrayBuffer], { type: 'audio/wav' });
+              const url = URL.createObjectURL(blob);
+              setAudioUrl(url);
+
+              const audio = new Audio(url);
+              audio.play();
+            } catch (error) {
+              console.error("TTS fetch/playback error:", error);
+            }
+          }
+
+          const botMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            content: data.feedback || "No feedback returned",
+            sender: "bot",
+            timestamp: new Date(),
+            type: "chat",
+          };
+          setMessages((prev) => [...prev, botMessage]);
+        })();
       })
-      .catch(error => {
-        console.error("Error getting AI response:", error)
-        // Show a fallback bot message
+      .catch((error) => {
+        console.error("Error getting AI response:", error);
         const fallbackMessage: Message = {
           id: (Date.now() + 2).toString(),
           content: "I’m sorry, but I couldn’t reach the AI service. Please try again later.",
           sender: "bot",
           timestamp: new Date(),
           type: "chat",
-        }
-        setMessages((prev) => [...prev, fallbackMessage])
-      })
-  }, [code, selectedProblem])
+        };
+        setMessages((prev) => [...prev, fallbackMessage]);
+      });
+  }, [code, selectedProblem]);
 
 
   // Listen for AI feedback event
