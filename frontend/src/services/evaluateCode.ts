@@ -3,7 +3,7 @@ import { TestResultList } from "@/types/testResults"
 export async function evaluateUserCode(problem: number, code: string): Promise<TestResultList> {
 
   try {
-    const response = await fetch("http://34.147.180.254:3001/eval", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/eval`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
