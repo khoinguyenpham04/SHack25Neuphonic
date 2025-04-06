@@ -1,60 +1,52 @@
-import { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createClient, toWav } from '@neuphonic/neuphonic-js';
 
-const client = createClient({ apiKey: process.env.NEUPHONIC_API_KEY || '' });
-
-export async function GET(request: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const msg = searchParams.get('msg')?.trim();
+    const { feedback } = await req.json();
 
-    if (!msg) {
-      return new Response(JSON.stringify({ error: 'Missing or empty `msg` parameter.' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+    if (!feedback) {
+      return NextResponse.json({ error: 'Missing feedback' }, { status: 400 });
     }
 
-    const ws = await client.tts.websocket({
-      speed: 1.15,
+    // Initialize the TTS client with your API key
+    const client = createClient({ apiKey: process.env.NEUPHONIC_API_KEY});
+
+    // Start the TTS SSE (Server Sent Events) stream
+    const sse = await client.tts.sse({
+      speed: 1,
       lang_code: 'en',
     });
 
-    const chunks: Uint8Array[] = [];
-    let byteLen = 0;
+    // Send the feedback to generate audio
+    const result = await sse.send(feedback);
 
-    for await (const chunk of ws.send(msg)) {
-      chunks.push(chunk.audio);
-      byteLen += chunk.audio.byteLength;
+    // Ensure that result.audio is valid
+    if (!result || !result.audio) {
+      console.error('No audio returned from TTS service.');
+      return NextResponse.json({ error: 'No audio data returned' }, { status: 500 });
     }
 
-    const allAudio = new Uint8Array(byteLen);
-    let offset = 0;
-    for (const chunk of chunks) {
-      allAudio.set(chunk, offset);
-      offset += chunk.byteLength;
+    // Convert the AudioBuffer (or similar) to WAV data
+    const wavData = toWav(result.audio);
+
+    // Check that we got more than just a header (44 bytes)
+    if (!wavData || wavData.length <= 44) {
+      console.error('Invalid WAV output, length:', wavData ? wavData.length : 0);
+      return NextResponse.json({ error: 'Invalid WAV output' + wavData }, { status: 500 });
     }
 
-    const wavData = toWav(allAudio);
-    await ws.close();
-
-    return new Response(Buffer.from(wavData), {
+    return new Response(wavData, {
       status: 200,
       headers: {
         'Content-Type': 'audio/wav',
-        // Optional: allow cross-origin fetches (if needed)
-        // 'Access-Control-Allow-Origin': '*',
-
-        // Optional: force download instead of playing inline
-        // 'Content-Disposition': 'attachment; filename="output.wav"',
+        'Content-Length': wavData.length.toString(),
+        // Optional: force inline playback or download
+        // 'Content-Disposition': 'inline; filename="feedback.wav"'
       },
     });
-
-  } catch (error) {
-    console.error('TTS Error:', error);
-    return new Response(JSON.stringify({ error: 'Failed to generate TTS audio' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+  } catch (err: any) {
+    console.error('TTS error:', err);
+    return NextResponse.json({ error: err }, { status: 500 });
   }
 }
