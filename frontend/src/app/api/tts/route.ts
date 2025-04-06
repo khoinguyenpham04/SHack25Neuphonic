@@ -10,7 +10,7 @@ export async function POST(req: Request) {
     }
 
     // Initialize the TTS client with your API key
-    const client = createClient({ apiKey: process.env.NEUPHONIC_API_KEY});
+    const client = createClient({ apiKey: process.env.NEUPHONIC_API_KEY! });
 
     // Start the TTS SSE (Server Sent Events) stream
     const sse = await client.tts.sse({
@@ -33,7 +33,10 @@ export async function POST(req: Request) {
     // Check that we got more than just a header (44 bytes)
     if (!wavData || wavData.length <= 44) {
       console.error('Invalid WAV output, length:', wavData ? wavData.length : 0);
-      return NextResponse.json({ error: 'Invalid WAV output' + wavData }, { status: 500 });
+      return NextResponse.json(
+        { error: `Invalid WAV output, length: ${wavData ? wavData.length : 0}` },
+        { status: 500 }
+      );
     }
 
     return new Response(wavData, {
@@ -41,12 +44,11 @@ export async function POST(req: Request) {
       headers: {
         'Content-Type': 'audio/wav',
         'Content-Length': wavData.length.toString(),
-        // Optional: force inline playback or download
-        // 'Content-Disposition': 'inline; filename="feedback.wav"'
       },
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error('TTS error:', err);
-    return NextResponse.json({ error: err }, { status: 500 });
+    const errorMsg = err instanceof Error ? err.message : 'Internal server error';
+    return NextResponse.json({ error: errorMsg }, { status: 500 });
   }
 }

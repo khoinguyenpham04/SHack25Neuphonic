@@ -89,7 +89,7 @@ export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps)
 
   // Remove the unused state since it's only used in handleSpeechResult
   const [, setInputValue] = useState("")
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  // const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
 
   const handleSendMessage = useCallback((text: string) => {
