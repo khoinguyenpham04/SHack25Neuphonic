@@ -1,24 +1,44 @@
 {
-    "test_cases": [
-      {
-        "input": [1, 2],
-        "expected_output": [3]
-      },
-      {
-        "input": [5, 7],
-        "expected_output": [12]
-      },
-      {
-        "input": [0, 0],
-        "expected_output": [0]
-      },
-      {
-        "input": [-1, 1],
-        "expected_output": [0]
-      },
-      {
-        "input": [10, -5],
-        "expected_output": [5]
-      }
-    ]
-  }
+  "test_cases": [
+    {
+      "input": ["A man, a plan, a canal: Panama"],
+      "expected_output": [true]
+    },
+    {
+      "input": ["racecar"],
+      "expected_output": [true]
+    },
+    {
+      "input": [" "],
+      "expected_output": [true]
+    },
+    {
+      "input": ["No lemon, no melon"],
+      "expected_output": [true]
+    },
+    {
+      "input": ["Was it a car or a cat I saw?"],
+      "expected_output": [true]
+    },
+    {
+      "input": ["!@#$$#@!"],
+      "expected_output": [true]
+    },
+    {
+      "input": ["0P"],
+      "expected_output": [false]
+    },
+    {
+      "input": ["a"],
+      "expected_output": [true]
+    },
+    {
+      "input": ["ab"],
+      "expected_output": [false]
+    },
+    {
+      "input": ["Able was I ere I saw Elba"],
+      "expected_output": [true]
+    }
+  ]
+}

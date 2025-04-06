@@ -1,0 +1,84 @@
+{
+  "test_cases": [
+    {
+      "input": ["()"],
+      "expected_output": [true]
+    },
+    {
+      "input": ["()[]{}"],
+      "expected_output": [true]
+    },
+    {
+      "input": ["(]"],
+      "expected_output": [false]
+    },
+    {
+      "input": ["([])"],
+      "expected_output": [true]
+    },
+    {
+      "input": ["{[]}"],
+      "expected_output": [true]
+    },
+    {
+      "input": ["[{()}]"],
+      "expected_output": [true]
+    },
+    {
+      "input": ["((()))"],
+      "expected_output": [true]
+    },
+    {
+      "input": ["[()[{}]]"],
+      "expected_output": [true]
+    },
+    {
+      "input": ["(("],
+      "expected_output": [false]
+    },
+    {
+      "input": ["))"],
+      "expected_output": [false]
+    },
+    {
+      "input": ["([)]"],
+      "expected_output": [false]
+    },
+    {
+      "input": ["{[}"],
+      "expected_output": [false]
+    },
+    {
+      "input": ["([{}])]"],
+      "expected_output": [false]
+    },
+    {
+      "input": ["[({})"],
+      "expected_output": [false]
+    },
+    {
+      "input": ["("],
+      "expected_output": [false]
+    },
+    {
+      "input": [")"],
+      "expected_output": [false]
+    },
+    {
+      "input": ["({})"],
+      "expected_output": [true]
+    },
+    {
+      "input": ["()()"],
+      "expected_output": [true]
+    },
+    {
+      "input": ["()[()]"],
+      "expected_output": [true]
+    },
+    {
+      "input": ["()(]"],
+      "expected_output": [false]
+    }
+  ]
+}
