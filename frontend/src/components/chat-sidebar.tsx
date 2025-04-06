@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button"
 import { Sidebar, SidebarContent, SidebarHeader, SidebarFooter } from "@/components/ui/sidebar"
 import { AudioVisualizer } from "./AudioVisualizer"
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition"
-import { getAiAnalysis } from "@/services/aiAnalysisService"
+import { getAiAnalysis } from "@/services/fetchAiAnalysis"
 
 type Message = {
   id: string
@@ -67,6 +67,7 @@ export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps)
       language: 'python',
       problemDescription: selectedProblem.description,
       userInput: text,
+      harshness:"average"
     })
       .then(data => {
         const botMessage: Message = {
