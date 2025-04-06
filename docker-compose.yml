@@ -1,0 +1,22 @@
+services:
+  nextjs:
+    build: ./frontend
+    container_name: nextjs_app
+    ports:
+      - "3000:3000"  # Expose the Next.js app on port 3000
+    networks:
+      - app-network
+    depends_on:
+      - codedriver # Make sure the API starts before Next.js
+
+  codedriver:
+    build: ./codedriver # Path to your API server (could be an Express app, etc.)
+    container_name: codedriver
+    ports:
+      - "3001:3001"  # Expose the API on port 3001
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

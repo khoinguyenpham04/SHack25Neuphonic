@@ -13,7 +13,6 @@ async def handle_get(request):
 async def handle_post(request):
     # Ensure posts are made to the evaluation endpoint
     if request.path != "/eval":
-        print("fail")
         return web.json_response(
             {
                 "status": 400,
@@ -24,7 +23,6 @@ async def handle_post(request):
 
     # Check content type
     if request.content_type != "application/json":
-        print("fail2")
         return web.json_response(
             {"status": 400, "body": "Unsupported content type, please use `application/json`"}, status=400
         )
@@ -35,7 +33,6 @@ async def handle_post(request):
         problem_name = data.get("problem_name")
         code = data.get("user_code")
 
-        # print(f'Problem: {problem_name}, code: {code}')
 
         if not problem_name or not code:
             return web.json_response(
@@ -59,7 +56,6 @@ async def handle_post(request):
             {"status": 400, "body": "Invalid JSON data:\n" + data.text()}, status=400
         )
     except Exception as e:
-        print(e)
         return web.json_response(
             {"status": 500, "body": f"Error processing request: {str(e)}"}, status=500
         )

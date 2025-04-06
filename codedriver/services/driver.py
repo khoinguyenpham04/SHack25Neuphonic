@@ -92,7 +92,7 @@ def run_user_code(user_code: str, input_data: Any) -> Any:
         "abs": abs,
         "range": range,
         "len": len,
-        "print": print,
+        #"print": print,
         "str": str,
         "int": int,
         "float": float,
