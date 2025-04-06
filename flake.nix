@@ -25,7 +25,9 @@
 
                     pyright
                     (python3.withPackages(p : with p; [
+                      twisted
                       requests
+                      pyopenssl
                       python-lsp-server
                       numpy
                       numpy

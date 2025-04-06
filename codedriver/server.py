@@ -1,7 +1,9 @@
 import argparse
 import json
 from aiohttp import web
-import aiohttp_cors
+import aiohttp
+import ssl
+
 
 from services.evaluate_service import evaluate_problem
 
@@ -71,19 +73,12 @@ def run_server(port):
     app.router.add_get("/{path:.*}", handle_get)
     app.router.add_post("/{path:.*}", handle_post)
 
-    # Setup CORS
-    cors = aiohttp_cors.setup(app, defaults={
-        "*": aiohttp_cors.ResourceOptions(
-            allow_credentials=True,
-            expose_headers="*",
-            allow_headers="*",
-        )
-    })
+    # SSL context
+    ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+    ssl_context.load_cert_chain('cert.pem', 'key.pem')
 
-    # Apply CORS to all routes
-    for route in list(app.router.routes()):
-        cors.add(route)
-
+    # Run with HTTPS
+    web.run_app(app, host="", port=port, ssl_context=ssl_context)
     web.run_app(app, host="", port=port)
 
 
