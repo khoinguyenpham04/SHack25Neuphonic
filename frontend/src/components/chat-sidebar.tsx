@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { IconBrandCodesandbox } from '@tabler/icons-react'
 
 declare global {
   interface Window {
@@ -9,13 +10,13 @@ declare global {
   }
 }
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { Mic, MicOff, Bot, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sidebar, SidebarContent, SidebarHeader, SidebarFooter } from "@/components/ui/sidebar"
 import { AudioVisualizer } from "./AudioVisualizer"
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition"
-import { getAiAnalysis } from "@/services/aiAnalysisService"
+import { getAiAnalysis } from "@/services/fetchAiAnalysis"
 
 type Message = {
   id: string
@@ -44,7 +45,8 @@ interface ChatSidebarProps {
 
 export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps) {
 
-  const [inputValue, setInputValue] = useState("")
+  // Remove the unused state since it's only used in handleSpeechResult
+  const [, setInputValue] = useState("")
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
 
 
@@ -67,6 +69,7 @@ export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps)
       language: 'python',
       problemDescription: selectedProblem.description,
       userInput: text,
+      harshness:"average"
     })
       .then((data) => {
         // Process AI response inside an async IIFE
@@ -106,7 +109,7 @@ export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps)
         console.error("Error getting AI response:", error);
         const fallbackMessage: Message = {
           id: (Date.now() + 2).toString(),
-          content: "I’m sorry, but I couldn’t reach the AI service. Please try again later.",
+          content: "I'm sorry, but I couldn’t reach the AI service. Please try again later.",
           sender: "bot",
           timestamp: new Date(),
           type: "chat",
@@ -136,9 +139,9 @@ export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps)
   }, [])
 
   // Microphone To Text Hook useSpee
-  const onSpeechResult = useCallback((transcript: string) => {
-    setInputValue(transcript)
-  }, [])
+  // const onSpeechResult = useCallback((transcript: string) => {
+  //   setInputValue(transcript)
+  // }, [])
 
   const handleSpeechResult = useCallback((transcript: string) => {
     setInputValue(transcript)
@@ -159,12 +162,21 @@ export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps)
     },
   ])
 
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
 
   return (
     <Sidebar side="right" className="w-full h-screen border-l flex flex-col" collapsible="none">
       <SidebarHeader className="p-3 border-b flex-shrink-0">
         <h2 className="text-lg font-semibold flex items-center gap-2">
-          <Bot size={18} />
+          <IconBrandCodesandbox size={18} />
           <span>Code Assistant</span>
         </h2>
       </SidebarHeader>
@@ -185,6 +197,7 @@ export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps)
               </div>
             </div>
           ))}
+          <div ref={messagesEndRef} />
         </div>
       </SidebarContent>
 
