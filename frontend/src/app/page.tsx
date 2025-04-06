@@ -93,7 +93,9 @@ export default function HeroSection() {
                                     The LeetCode companion that provides real-time feedback, personalized guidance, and voice-enabled support to accelerate your interview preparation.
                                 </TextEffect>
 
-                                <div className="mt-12 flex flex-col items-center justify-center gap-2 md:flex-row animate-stagger animate-fade-in-blur animate-delay-075">
+                                
+
+                                <div className="flex flex-col items-center justify-center gap-2 mt-9 md:flex-row">
                                     <div
                                         key={1}
                                         className="bg-foreground/10 rounded-[calc(var(--radius-xl)+0.125rem)] border p-0.5">
@@ -106,37 +108,31 @@ export default function HeroSection() {
                                             </Link>
                                         </Button>
                                     </div>
+                                
                                     <Button
-                                        key={2}
+                                        key={3}
                                         asChild
                                         size="lg"
-                                        variant="ghost"
+                                        variant="outline"
                                         className="h-10.5 rounded-xl px-5 text-foreground hover:text-foreground/90 hover:bg-accent">
                                         <Link href="#link">
-                                            <span className="text-nowrap">Request a demo</span>
+                                            <span className="text-nowrap">Learn More</span>
                                         </Link>
                                     </Button>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="animate-stagger animate-fade-in-blur animate-delay-075">
-                            <div className="relative -mr-56 mt-8 overflow-hidden px-2 sm:mr-0 sm:mt-12 md:mt-20">
+                        <div>
+                            <div className="relative -mr-56 mt-8 overflow-hidden pt-5 px-2 sm:mr-0 sm:mt-12 md:mt-20">
                                 <div
                                     aria-hidden
                                     className="bg-linear-to-b to-background absolute inset-0 z-10 from-transparent from-35%"
                                 />
-                                <div className="inset-shadow-2xs ring-background dark:inset-shadow-white/20 bg-background relative mx-auto max-w-6xl overflow-hidden rounded-2xl border p-4 shadow-lg shadow-zinc-950/15 ring-1">
+                                <div className="inset-shadow-2xs ring-background dark:inset-shadow-white/20 bg-background relative mx-auto max-w-6xl overflow-hidden rounded-2xl border p-4 shadow-lg shadow-zinc-950/15 ring-1 animate-glow">
                                     <Image
                                         className="bg-background aspect-15/8 relative hidden rounded-2xl dark:block"
-                                        src="/images/hero-img.png"
-                                        alt="app screen"
-                                        width="2700"
-                                        height="1440"
-                                    />
-                                    <Image
-                                        className="z-2 border-border/25 aspect-15/8 relative rounded-2xl border dark:hidden"
-                                        src="/mail2-light.png"
+                                        src="/images/Screenshot 2025-04-06 at 02.45.30.png"
                                         alt="app screen"
                                         width="2700"
                                         height="1440"
