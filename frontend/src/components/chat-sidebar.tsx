@@ -10,6 +10,48 @@ declare global {
   }
 }
 
+const playAudio = async (feedback: string) => {
+  try {
+    const res = await fetch('/api/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ feedback: feedback }),
+    });
+
+    if (!res.ok || !res.body) {
+      console.error('Failed to fetch audio:', res.status);
+      return;
+    }
+
+    // Read the response stream into chunks
+    const reader = res.body.getReader();
+    const chunks: Uint8Array[] = [];
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value) {
+        chunks.push(value);
+      }
+    }
+
+    // Create a Blob from the chunks and generate an object URL
+    const blob = new Blob(chunks, { type: 'audio/wav' });
+    const audioUrl = URL.createObjectURL(blob);
+
+    // Play the audio using the Audio API
+    const audio = new Audio(audioUrl);
+    audio.play();
+
+    // Clean up the object URL when playback is finished
+    audio.onended = () => {
+      URL.revokeObjectURL(audioUrl);
+    };
+
+  } catch (error) {
+    console.error("TTS fetch/playback error:", error);
+  }
+};
+
 import { useState, useEffect, useCallback, useRef } from "react"
 import { Mic, MicOff, Bot, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -69,40 +111,24 @@ export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps)
       language: 'python',
       problemDescription: selectedProblem.description,
       userInput: text,
-      harshness:"average"
+      harshness: "average"
     })
       .then((data) => {
         // Process AI response inside an async IIFE
         (async () => {
           if (data.feedback) {
-            console.log(data.feedback)
-            try {
-              
-              const res = await fetch(`/api/tts?msg=${data.feedback}`);
-              if (!res.ok) {
-                throw new Error(`Failed to fetch TTS: ${res.statusText}`);
-              }
+            console.log(data.feedback);
+            await playAudio(data.feedback);
 
-              const arrayBuffer = await res.arrayBuffer();
-              const blob = new Blob([arrayBuffer], { type: 'audio/wav' });
-              const url = URL.createObjectURL(blob);
-              setAudioUrl(url);
-
-              const audio = new Audio(url);
-              audio.play();
-            } catch (error) {
-              console.error("TTS fetch/playback error:", error);
-            }
+            const botMessage: Message = {
+              id: (Date.now() + 1).toString(),
+              content: data.feedback || "No feedback returned",
+              sender: "bot",
+              timestamp: new Date(),
+              type: "chat",
+            };
+            setMessages((prev) => [...prev, botMessage]);
           }
-
-          const botMessage: Message = {
-            id: (Date.now() + 1).toString(),
-            content: data.feedback || "No feedback returned",
-            sender: "bot",
-            timestamp: new Date(),
-            type: "chat",
-          };
-          setMessages((prev) => [...prev, botMessage]);
         })();
       })
       .catch((error) => {
