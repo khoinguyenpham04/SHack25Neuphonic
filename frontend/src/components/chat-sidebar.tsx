@@ -44,7 +44,8 @@ interface ChatSidebarProps {
 
 export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps) {
 
-  const [inputValue, setInputValue] = useState("")
+  // Remove the unused state since it's only used in handleSpeechResult
+  const [, setInputValue] = useState("")
 
 
   const handleSendMessage = useCallback((text: string) => {
