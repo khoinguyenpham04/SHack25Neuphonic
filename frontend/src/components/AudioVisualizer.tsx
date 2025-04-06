@@ -50,7 +50,7 @@ export function AudioVisualizer() {
 
       analyser.getByteFrequencyData(dataArray)
 
-      ctx.fillStyle = '#F9FAFB'
+      ctx.fillStyle = '#171717'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
       const centerY = canvas.height / 2

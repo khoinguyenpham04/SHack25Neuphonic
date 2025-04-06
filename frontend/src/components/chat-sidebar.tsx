@@ -14,6 +14,8 @@ import { Mic, MicOff, Bot, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sidebar, SidebarContent, SidebarHeader, SidebarFooter } from "@/components/ui/sidebar"
 import { AudioVisualizer } from "./AudioVisualizer"
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition"
+import { getAiAnalysis } from "@/services/aiAnalysisService"
 
 type Message = {
   id: string
@@ -41,11 +43,57 @@ interface ChatSidebarProps {
 }
 
 export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps) {
-  const [isRecording, setIsRecording] = useState(false)
-  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null)
 
+  const [inputValue, setInputValue] = useState("")
+
+
+  const handleSendMessage = useCallback((text: string) => {
+    if (!text.trim()) return
+
+    // 1) Add user message
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      content: text,
+      sender: "user",
+      timestamp: new Date(),
+    }
+    setMessages((prev) => [...prev, userMessage])
+    setInputValue("")
+
+    // 2) Fetch AI response
+    getAiAnalysis({
+      code,
+      language: 'python',
+      problemDescription: selectedProblem.description,
+      userInput: text,
+    })
+      .then(data => {
+        const botMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: data.feedback || "No feedback returned",
+          sender: "bot",
+          timestamp: new Date(),
+          type: "chat"
+        }
+        setMessages((prev) => [...prev, botMessage])
+      })
+      .catch(error => {
+        console.error("Error getting AI response:", error)
+        // Show a fallback bot message
+        const fallbackMessage: Message = {
+          id: (Date.now() + 2).toString(),
+          content: "I’m sorry, but I couldn’t reach the AI service. Please try again later.",
+          sender: "bot",
+          timestamp: new Date(),
+          type: "chat",
+        }
+        setMessages((prev) => [...prev, fallbackMessage])
+      })
+  }, [code, selectedProblem])
+
+
+  // Listen for AI feedback event
   useEffect(() => {
-    // Listen for AI analysis feedback
     const handleAIAnalysis = (event: CustomEvent<{ feedback: string }>) => {
       const feedbackMessage: Message = {
         id: Date.now().toString(),
@@ -58,49 +106,26 @@ export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps)
     }
 
     window.addEventListener('aiAnalysis', handleAIAnalysis as EventListener)
-    return () => window.removeEventListener('aiAnalysis', handleAIAnalysis as EventListener)
+
+    return () =>
+      window.removeEventListener('aiAnalysis', handleAIAnalysis as EventListener)
   }, [])
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-      if (SpeechRecognition) {
-        const recognition = new SpeechRecognition()
-        recognition.continuous = false
-        recognition.interimResults = false
-        recognition.lang = 'en-US'
-
-        recognition.onresult = (event) => {
-          const transcript = event.results[0][0].transcript
-          setInputValue(transcript)
-          handleSendMessage(transcript)
-        }
-
-        recognition.onerror = (event) => {
-          console.error('Speech recognition error:', event.error)
-          setIsRecording(false)
-        }
-
-        recognition.onend = () => {
-          setIsRecording(false)
-        }
-
-        setRecognition(recognition)
-      }
-    }
+  // Microphone To Text Hook useSpee
+  const onSpeechResult = useCallback((transcript: string) => {
+    setInputValue(transcript)
   }, [])
 
-  const toggleRecording = useCallback(() => {
-    if (!recognition) return
+  const handleSpeechResult = useCallback((transcript: string) => {
+    setInputValue(transcript)
+    handleSendMessage(transcript)
+  }, [handleSendMessage])
 
-    if (isRecording) {
-      recognition.stop()
-    } else {
-      recognition.start()
-      setIsRecording(true)
-    }
-  }, [isRecording, recognition])
+  // Use Hook
 
+  const { isRecording, toggleRecording } = useSpeechRecognition(handleSpeechResult)
+
+  // Initialise First Message
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -109,50 +134,7 @@ export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps)
       timestamp: new Date(),
     },
   ])
-  const [inputValue, setInputValue] = useState("")
 
-  const handleSendMessage = (text: string) => {
-    if (!text.trim()) return
-
-    // Add user message
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content: text,
-      sender: "user",
-      timestamp: new Date(),
-    }
-
-    setMessages((prev) => [...prev, userMessage])
-    setInputValue("")
-
-    // Send user's question to AI analysis endpoint
-    fetch('/api/analyse', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        code,
-        language: 'python',
-        problemDescription: selectedProblem.description,
-        userInput: text,
-      }),
-    })
-      .then(response => response.json())
-      .then(data => {
-        const botMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          content: data.feedback || "I'll help you analyze your code and provide suggestions for improvement.",
-          sender: "bot",
-          timestamp: new Date(),
-          type: "chat"
-        }
-        setMessages((prev) => [...prev, botMessage])
-      })
-      .catch(error => {
-        console.error('Error getting AI response:', error)
-      })
-  }
 
   return (
     <Sidebar side="right" className="w-full h-screen border-l flex flex-col" collapsible="none">
@@ -162,15 +144,14 @@ export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps)
           <span>Code Assistant</span>
         </h2>
       </SidebarHeader>
-    
+
       <SidebarContent className="p-3 flex-1 overflow-y-auto min-h-0">
         <div className="flex flex-col gap-4">
           {messages.map((message) => (
             <div key={message.id} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
               <div
-                className={`max-w-[80%] rounded-lg p-3 ${
-                  message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
-                }`}
+                className={`max-w-[80%] rounded-lg p-3 ${message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
+                  }`}
               >
                 <div className="flex items-center gap-2 mb-1">
                   {message.sender === "bot" ? <Bot size={14} /> : <User size={14} />}
@@ -182,7 +163,7 @@ export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps)
           ))}
         </div>
       </SidebarContent>
-    
+
       <SidebarFooter className="p-3 border-t flex-shrink-0">
         <div className="flex flex-col items-center gap-4">
           {isRecording && (
@@ -194,9 +175,8 @@ export default function ChatSidebar({ code, selectedProblem }: ChatSidebarProps)
             onClick={toggleRecording}
             size="icon"
             variant={isRecording ? "destructive" : "default"}
-            className={`w-12 h-12 rounded-full ${
-              isRecording ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'
-            } text-white`}
+            className={`w-12 h-12 rounded-full ${isRecording ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'
+              } text-white`}
           >
             {isRecording ? <MicOff size={24} /> : <Mic size={24} />}
             <span className="sr-only">{isRecording ? "Stop recording" : "Start recording"}</span>

@@ -1,7 +1,7 @@
 import argparse
 import json
 from aiohttp import web
-import aiohttp_cors  
+import aiohttp_cors
 
 from services.evaluate_service import evaluate_problem
 
@@ -42,19 +42,21 @@ async def handle_post(request):
                 {"status": 400, "body": "`problem_name` and `code` must be provided in the JSON."},
                 status=400,
             )
-        
+
         evaluation_result = evaluate_problem(problem_name, code)
-        print(evaluation_result)
-
-
 
         return web.json_response(
-            {"status": 200, "body": f"Received problem: {problem_name}, code length: {len(code)}"}
+            {
+                "status": 200,
+                "body": {
+                    "testResults": evaluation_result["tests"]
+                }
+            }
         )
 
     except json.JSONDecodeError:
         return web.json_response(
-            {"status": 400, "body": "Invalid JSON data:\n" + data.text() }, status=400
+            {"status": 400, "body": "Invalid JSON data:\n" + data.text()}, status=400
         )
     except Exception as e:
         print(e)
@@ -83,6 +85,7 @@ def run_server(port):
         cors.add(route)
 
     web.run_app(app, host="", port=port)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("code-eval-server")

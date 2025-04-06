@@ -16,7 +16,7 @@ def _ast_check_no_imports(user_code: str, allowed_imports: set) -> None:
         # Check plain import statements: 'import xyz'
         if isinstance(node, ast.Import):
             for alias in node.names:
-                print(alias.name)
+                
                 if alias.name not in allowed_imports:
                     raise ValueError(f"Import of '{alias.name}' is not allowed.")
         # Check 'from xyz import abc' statements
@@ -73,7 +73,7 @@ def run_user_code(user_code: str, input_data: Any) -> Any:
     # Check that the AST does not contain disallowed imports.
 
     global ALLOWED_MODULES
-    ALLOWED_MODULES = {"math"}
+    ALLOWED_MODULES = {"math","typing"}
 
     _ast_check_no_imports(user_code, ALLOWED_MODULES)
 
@@ -97,6 +97,7 @@ def run_user_code(user_code: str, input_data: Any) -> Any:
         "int": int,
         "float": float,
         "bool": bool,
+        "enumerate":enumerate
     }
 
     safe_globals: Dict[str, Any] = {
@@ -169,10 +170,22 @@ def run_test_cases(user_code: str, test_cases: List[Dict[str, Any]]) -> List[Dic
         start_time = time.perf_counter()
         try:
             user_output = run_user_code(user_code, input_data)
+
+            # Normalize user_output: unpack [ [0, 1] ] → [0, 1]
+            if (
+                isinstance(user_output, list) and 
+                len(user_output) == 1 and 
+                isinstance(user_output[0], list) and 
+                user_output != expected_output
+            ):
+                user_output = user_output[0]
+
             success = user_output == expected_output
+
         except Exception as e:
             user_output = str(e)
             success = False
+
         execution_time = time.perf_counter() - start_time
         
         results.append({
